@@ -5,9 +5,9 @@ precision highp float;
 #define TOON 1
 #define SSAO 1
 
-uniform sampler2D u_depthTex;    // d
+//uniform sampler2D u_depthTex;    // d
 uniform sampler2D u_positionTex; // px py pz
-uniform sampler2D u_colorTex;    // r g b
+uniform sampler2D u_colorTex;    // r g b d
 uniform sampler2D u_normalTex;   // nx ny (nz)
 
 uniform float u_zFar;
@@ -49,8 +49,10 @@ void main()
 {
     vec3  n = texture2D(u_normalTex  , v_texcoord).rgb;
     vec3  p = texture2D(u_positionTex, v_texcoord).rgb;
-    vec3  c = texture2D(u_colorTex   , v_texcoord).rgb;
-    float d = texture2D(u_depthTex   , v_texcoord).r;
+    vec4 tc = texture2D(u_colorTex   , v_texcoord);
+    vec3  c = tc.xyz;
+    float d = tc.w;
+    //float d = texture2D(u_depthTex   , v_texcoord).r;
 
 #if LAYOUTTEST
 
@@ -83,7 +85,7 @@ void main()
             hemi *= mix(0.1, 1.0, scale * scale);
             vec3 samppos = mat3(tang, bitang, n) * hemi;
             vec2 sampcoord = v_texcoord + samppos.xy;
-            if (samppos.z < texture2D(u_depthTex, sampcoord).r) {
+            if (samppos.z < texture2D(u_colorTex, sampcoord).w) {
                 aofact += 1.0;
             }
         }
